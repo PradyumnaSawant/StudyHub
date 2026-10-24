@@ -1,0 +1,59 @@
+<div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between position-relative">
+    <div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="type-pill text-uppercase"><i class="fa-solid fa-file-lines me-1"></i> {{ resource.type }}</span>
+            <div>
+                {% if resource.verification_status == 'verified' %}
+                <span class="badge badge-verified"><i class="fa-solid fa-circle-check me-1"></i> Verified</span>
+                {% elif resource.verification_status == 'pending' %}
+                <span class="badge badge-pending"><i class="fa-solid fa-clock me-1"></i> Pending</span>
+                {% elif resource.verification_status == 'outdated' %}
+                <span class="badge badge-outdated"><i class="fa-solid fa-triangle-exclamation me-1"></i> Outdated</span>
+                {% else %}
+                <span class="badge badge-rejected"><i class="fa-solid fa-ban me-1"></i> Rejected</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <h5 class="fw-bold text-white mb-2">
+            <a href="/resources/{{ resource.id }}" class="text-white text-decoration-none hover-primary">{{ resource.title }}</a>
+        </h5>
+
+        <div class="text-muted small mb-2">
+            <i class="fa-solid fa-book-bookmark text-info me-1"></i> {{ resource.subject.name if resource.subject else 'Subject' }} ({{ resource.subject.code if resource.subject else '' }})
+        </div>
+
+        <div class="text-muted small mb-3">
+            <i class="fa-solid fa-tag text-warning me-1"></i> {{ resource.syllabus_tag }}
+        </div>
+
+        <p class="text-muted small mb-4 line-clamp-2">
+            {{ resource.description or 'Syllabus aligned study note and exam preparation reference.' }}
+        </p>
+    </div>
+
+    <div>
+        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-secondary border-opacity-25 mb-3">
+            <span class="text-muted small"><i class="fa-solid fa-download me-1"></i> {{ resource.download_count }} downloads</span>
+            <span class="text-muted small"><i class="fa-solid fa-user me-1"></i> {{ resource.uploader.name if resource.uploader else 'Student' }}</span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <a href="/resources/{{ resource.id }}" class="btn btn-glass btn-sm flex-grow-1"><i class="fa-solid fa-eye me-1"></i> View Detail</a>
+            
+            <button class="btn btn-glass btn-sm text-warning"
+                    hx-post="/resources/{{ resource.id }}/ai-summary"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                    title="Generate AI Fast-Track Summary">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+
+            {% if user %}
+            <div id="bookmark-btn-{{ resource.id }}">
+                {% include "components/bookmark_btn.html" %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}StudyHub - Centralized Engineering Study Material Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center g-5 mb-5 py-4">
+        <div class="col-lg-7 animate-fade-in">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-primary bg-opacity-10 border border-primary border-opacity-25 text-primary mb-3">
+                <i class="fa-solid fa-sparkles"></i>
+                <span class="fw-semibold small">Syllabus-Aligned Engineering Knowledge Hub</span>
+            </div>
+            <h1 class="display-3 fw-bold mb-4 text-white" style="letter-spacing: -1px; line-height: 1.15;">
+                Master Engineering Subjects with <span class="brand-text">Verified Materials</span> & AI Summaries
+            </h1>
+            <p class="fs-5 text-muted mb-4 pe-lg-4">
+                Access peer-reviewed lecture notes, previous year exam questions (PYQs), question banks, and last-minute revision sheets tagged precisely by university syllabus & unit patterns.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                {% if user %}
+                <a href="/dashboard" class="btn btn-primary-gradient btn-lg px-4 py-3"><i class="fa-solid fa-gauge-high me-2"></i> Go to Student Dashboard</a>
+                {% else %}
+                <a href="/register" class="btn btn-primary-gradient btn-lg px-4 py-3"><i class="fa-solid fa-rocket me-2"></i> Join Your Engineering Branch</a>
+                <a href="/resources" class="btn btn-glass btn-lg px-4 py-3"><i class="fa-solid fa-magnifying-glass me-2"></i> Explore Free Material</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-5 text-center">
+            <div class="glass-panel p-4 position-relative overflow-hidden text-start">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-2 rounded-3 bg-indigo-500 bg-opacity-25 text-indigo">
+                            <i class="fa-solid fa-brain fs-3 text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-white fw-bold">AI Note Summarizer</h5>
+                            <span class="text-muted small">Instant key points & formulas</span>
+                        </div>
+                    </div>
+                    <span class="badge badge-verified"><i class="fa-solid fa-bolt me-1"></i> Fast-Track</span>
+                </div>
+
+                <div class="bg-dark bg-opacity-50 p-3 rounded-3 mb-3 border border-secondary border-opacity-25">
+                    <div class="fw-bold text-white mb-2"><i class="fa-solid fa-list-check me-2 text-info"></i> Unit 2: Binary Search Trees & Graphs</div>
+                    <ul class="list-unstyled mb-0 small text-muted">
+                        <li class="mb-1">✓ <strong>Time Complexity</strong>: O(log N) average search, insertion, and deletion.</li>
+                        <li class="mb-1">✓ <strong>AVL Trees</strong>: Self-balancing property with height differential <= 1.</li>
+                        <li class="mb-0">✓ <strong>Graph Traversals</strong>: BFS (Queue) vs DFS (Stack/Recursion).</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="fa-solid fa-check-double text-emerald me-1"></i> Verified by Faculty Verifiers</span>
+                    <span><i class="fa-solid fa-file-pdf me-1"></i> PDF Ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="glass-panel p-4 text-center">
+                <h2 class="display-5 fw-bold text-primary mb-1">{{ total_resources }}+</h2>
+                <div class="text-muted fw-semibold"><i class="fa-solid fa-file-lines me-2"></i> Verified Study Materials</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-panel p-4 text-center">
+                <h2 class="display-5 fw-bold text-info mb-1">{{ total_subjects }}+</h2>
+                <div class="text-muted fw-semibold"><i class="fa-solid fa-book me-2"></i> Engineering Subjects</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-panel p-4 text-center">
+                <h2 class="display-5 fw-bold text-success mb-1">{{ total_students }}+</h2>
+                <div class="text-muted fw-semibold"><i class="fa-solid fa-users me-2"></i> Active Engineering Students</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Verified Resources Grid -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-fire text-amber me-2"></i> Popular Verified Resources</h3>
+            <p class="text-muted mb-0">High-yield exam notes and PYQs curated for engineering semesters</p>
+        </div>
+        <a href="/resources" class="btn btn-glass"><i class="fa-solid fa-arrow-right me-1"></i> View All Resources</a>
+    </div>
+
+    <div class="row g-4">
+        {% for resource in recent_resources %}
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-panel p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="type-pill text-uppercase"><i class="fa-solid fa-file-invoice me-1"></i> {{ resource.type }}</span>
+                        <span class="badge badge-verified"><i class="fa-solid fa-circle-check me-1"></i> Verified</span>
+                    </div>
+
+                    <h5 class="fw-bold text-white mb-2">
+                        <a href="/resources/{{ resource.id }}" class="text-white text-decoration-none hover-primary">{{ resource.title }}</a>
+                    </h5>
+                    
+                    <p class="text-muted small mb-3">
+                        <i class="fa-solid fa-book-bookmark me-1 text-info"></i> {{ resource.subject.name if resource.subject else 'Subject' }} ({{ resource.subject.code if resource.subject else '' }})
+                    </p>
+
+                    <p class="text-muted small mb-3 text-truncate">
+                        {{ resource.description or 'Comprehensive engineering course study notes aligned with university syllabus.' }}
+                    </p>
+                </div>
+
+                <div class="pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                    <span class="text-muted small"><i class="fa-solid fa-download me-1"></i> {{ resource.download_count }} downloads</span>
+                    <a href="/resources/{{ resource.id }}" class="btn btn-glass btn-sm"><i class="fa-solid fa-eye me-1"></i> View Detail</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Study Resources - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-book-open text-primary me-2"></i> Engineering Resource Catalog</h3>
+            <p class="text-muted mb-0">Search notes, PYQs, and question banks by syllabus unit and subject code</p>
+        </div>
+        <a href="/resources/upload" class="btn btn-primary-gradient"><i class="fa-solid fa-plus me-1"></i> Share Material</a>
+    </div>
+
+    <!-- Filter Bar Card -->
+    <div class="glass-panel p-4 mb-4">
+        <form hx-get="/resources" 
+              hx-target="#search-results-container" 
+              hx-trigger="keyup from:#search-input changed delay:300ms, change from:.filter-trigger" 
+              hx-push-url="true">
+            <div class="row g-3">
+                <!-- Keyword search -->
+                <div class="col-md-4">
+                    <label class="form-label text-muted small fw-semibold">Search Keywords</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="search-input" name="query" value="{{ query }}" class="form-control form-control-glass" placeholder="Title, concept, syllabus unit...">
+                    </div>
+                </div>
+
+                <!-- Department filter -->
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-semibold">Branch / Dept</label>
+                    <select name="department" class="form-select form-select-glass filter-trigger">
+                        <option value="All" {% if selected_department == 'All' %}selected{% endif %}>All Branches</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept }}" {% if selected_department == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Resource Type filter -->
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-semibold">Resource Type</label>
+                    <select name="type" class="form-select form-select-glass filter-trigger">
+                        <option value="All" {% if selected_type == 'All' %}selected{% endif %}>All Types</option>
+                        <option value="notes" {% if selected_type == 'notes' %}selected{% endif %}>Lecture Notes</option>
+                        <option value="PYQ" {% if selected_type == 'PYQ' %}selected{% endif %}>Previous Year PYQs</option>
+                        <option value="question_bank" {% if selected_type == 'question_bank' %}selected{% endif %}>Question Bank</option>
+                        <option value="revision" {% if selected_type == 'revision' %}selected{% endif %}>Revision Sheet</option>
+                    </select>
+                </div>
+
+                <!-- Syllabus Version filter -->
+                <div class="col-md-2">
+                    <label class="form-label text-muted small fw-semibold">Syllabus Year</label>
+                    <select name="syllabus_version" class="form-select form-select-glass filter-trigger">
+                        <option value="All" {% if selected_syllabus_version == 'All' %}selected{% endif %}>All Versions</option>
+                        <option value="2024" {% if selected_syllabus_version == '2024' %}selected{% endif %}>2024 Pattern</option>
+                        <option value="2022" {% if selected_syllabus_version == '2022' %}selected{% endif %}>2022 Pattern</option>
+                    </select>
+                </div>
+
+                <!-- Verified Toggle -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input filter-trigger" type="checkbox" name="verified_only" id="verified_only" value="true" {% if verified_only %}checked{% endif %}>
+                        <label class="form-check-label text-white small fw-semibold" for="verified_only">
+                            <i class="fa-solid fa-circle-check text-emerald me-1"></i> Verified Only
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Live Search Results Container (Replaced by HTMX) -->
+    <div id="search-results-container">
+        {% include "components/search_results.html" %}
+    </div>
+</div>
+{% endblock %}

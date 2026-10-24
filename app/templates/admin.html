@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Control Panel - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-user-gear text-primary me-2"></i> System Administration Control</h3>
+            <p class="text-muted mb-0">Manage user roles, create courses/subjects, and moderate flagged content</p>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="glass-panel p-3 text-center">
+                <div class="text-muted small fw-semibold">Total Users</div>
+                <div class="fs-3 fw-bold text-white mt-1">{{ stats.users }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-panel p-3 text-center">
+                <div class="text-muted small fw-semibold">Verified Materials</div>
+                <div class="fs-3 fw-bold text-success mt-1">{{ stats.verified_resources }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-panel p-3 text-center">
+                <div class="text-muted small fw-semibold">Pending Verifications</div>
+                <div class="fs-3 fw-bold text-warning mt-1">{{ stats.pending_verifications }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-panel p-3 text-center">
+                <div class="text-muted small fw-semibold">Reported Content</div>
+                <div class="fs-3 fw-bold text-rose mt-1">{{ stats.reports }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <ul class="nav nav-pills glass-panel p-2 mb-4 gap-2" id="adminTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active text-white" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button"><i class="fa-solid fa-users me-1"></i> User Roles ({{ users|length }})</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link text-white" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects-pane" type="button"><i class="fa-solid fa-book me-1"></i> Subjects Catalog ({{ subjects|length }})</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link text-white" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane" type="button"><i class="fa-solid fa-flag me-1 text-danger"></i> Reported Resources ({{ reports|length }})</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabsContent">
+        <!-- Users Management Pane -->
+        <div class="tab-pane fade show active" id="users-pane">
+            <div class="glass-panel p-4">
+                <h5 class="fw-bold text-white mb-3">Platform Registered Users</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Branch & Semester</th>
+                                <th>Role</th>
+                                <th>Change Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td class="fw-bold text-white">{{ u.name }}</td>
+                                <td class="text-muted small">{{ u.email }}</td>
+                                <td class="text-muted small">{{ u.course }} (Sem {{ u.semester }})</td>
+                                <td><span class="badge rounded-pill bg-secondary text-capitalize">{{ u.role }}</span></td>
+                                <td>
+                                    <form action="/admin/users/{{ u.id }}/role" method="POST" class="d-flex align-items-center gap-2">
+                                        <select name="role" class="form-select form-select-glass form-select-sm py-1" style="width: 140px;">
+                                            <option value="Student" {% if u.role == 'Student' %}selected{% endif %}>Student</option>
+                                            <option value="Verifier" {% if u.role == 'Verifier' %}selected{% endif %}>Verifier</option>
+                                            <option value="Admin" {% if u.role == 'Admin' %}selected{% endif %}>Admin</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-glass btn-sm">Save</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Management Pane -->
+        <div class="tab-pane fade" id="subjects-pane">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="glass-panel p-4">
+                        <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-plus-circle me-1 text-primary"></i> Add Engineering Subject</h5>
+                        <form action="/admin/subjects/create" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Subject Name</label>
+                                <input type="text" name="name" class="form-control form-control-glass" placeholder="e.g. Operating Systems" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Subject Code</label>
+                                <input type="text" name="code" class="form-control form-control-glass" placeholder="e.g. CS302" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label text-muted small">Department</label>
+                                    <input type="text" name="department" class="form-control form-control-glass" placeholder="CSE" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-muted small">Semester</label>
+                                    <input type="number" name="semester" class="form-control form-control-glass" value="3" min="1" max="8" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label text-muted small">Syllabus Pattern Year</label>
+                                <input type="text" name="syllabus_version" class="form-control form-control-glass" value="2024">
+                            </div>
+                            <button type="submit" class="btn btn-primary-gradient w-100">Add Subject</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="glass-panel p-4">
+                        <h5 class="fw-bold text-white mb-3">Configured Subjects</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+                                <thead>
+                                    <tr class="text-muted small">
+                                        <th>Code</th>
+                                        <th>Subject Name</th>
+                                        <th>Department</th>
+                                        <th>Sem</th>
+                                        <th>Syllabus</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in subjects %}
+                                    <tr>
+                                        <td><span class="badge bg-dark border border-secondary text-info fw-mono">{{ s.code }}</span></td>
+                                        <td class="fw-bold text-white">{{ s.name }}</td>
+                                        <td class="text-muted small">{{ s.department }}</td>
+                                        <td class="text-muted small">Sem {{ s.semester }}</td>
+                                        <td class="text-muted small">{{ s.syllabus_version }} Pattern</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Pane -->
+        <div class="tab-pane fade" id="reports-pane">
+            <div class="glass-panel p-4">
+                <h5 class="fw-bold text-white mb-3">Flagged Content Queue</h5>
+                {% if reports %}
+                    {% for r in reports %}
+                    <div class="p-3 bg-dark bg-opacity-50 rounded-3 mb-3 border border-danger border-opacity-25">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="badge bg-danger text-white me-2">Pending Review</span>
+                                <strong class="text-white">{{ r.resource.title if r.resource else 'Resource deleted' }}</strong>
+                            </div>
+                            <span class="text-muted small">{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                        <p class="text-muted small mb-3"><strong>Reason</strong>: "{{ r.reason }}" (Reported by {{ r.reporter.name }})</p>
+
+                        <div class="d-flex gap-2">
+                            <form action="/admin/reports/{{ r.id }}/resolve" method="POST">
+                                <input type="hidden" name="action" value="resolve">
+                                <button type="submit" class="btn btn-success btn-sm">Mark Resolved</button>
+                            </form>
+                            <form action="/admin/reports/{{ r.id }}/resolve" method="POST">
+                                <input type="hidden" name="action" value="delete_resource">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete Resource</button>
+                            </form>
+                            <form action="/admin/reports/{{ r.id }}/resolve" method="POST">
+                                <input type="hidden" name="action" value="dismiss">
+                                <button type="submit" class="btn btn-glass btn-sm">Dismiss Report</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="fa-solid fa-shield-check fs-1 text-emerald mb-3"></i>
+                    <p class="mb-0">No active flagged resource reports.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

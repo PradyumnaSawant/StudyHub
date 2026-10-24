@@ -1,0 +1,40 @@
+<td>
+    <div class="fw-bold text-white mb-0">
+        <a href="/resources/{{ resource.id }}" class="text-white text-decoration-none hover-primary" target="_blank">{{ resource.title }}</a>
+    </div>
+    <div class="text-muted small"><i class="fa-solid fa-file-pdf me-1"></i> {{ resource.type|capitalize }} • {{ resource.file_size or 'PDF' }}</div>
+</td>
+
+<td>
+    <div class="text-white small fw-semibold">{{ resource.subject.name if resource.subject else 'General' }} ({{ resource.subject.code if resource.subject else '' }})</div>
+    <div class="text-muted small"><i class="fa-solid fa-tag me-1 text-warning"></i> {{ resource.syllabus_tag }}</div>
+</td>
+
+<td>
+    <div class="text-white small">{{ resource.uploader.name if resource.uploader else 'Student' }}</div>
+    <div class="text-muted small">{{ resource.uploader.course or 'CSE' }} (Sem {{ resource.uploader.semester or 1 }})</div>
+</td>
+
+<td>
+    {% if resource.verification_status == 'verified' %}
+    <span class="badge badge-verified"><i class="fa-solid fa-circle-check me-1"></i> Verified</span>
+    {% elif resource.verification_status == 'pending' %}
+    <span class="badge badge-pending"><i class="fa-solid fa-clock me-1"></i> Pending</span>
+    {% elif resource.verification_status == 'outdated' %}
+    <span class="badge badge-outdated"><i class="fa-solid fa-triangle-exclamation me-1"></i> Outdated</span>
+    {% else %}
+    <span class="badge badge-rejected"><i class="fa-solid fa-ban me-1"></i> Rejected</span>
+    {% endif %}
+</td>
+
+<td class="text-end">
+    <form hx-post="/verification/{{ resource.id }}/review"
+          hx-target="#verification-row-{{ resource.id }}"
+          hx-swap="innerHTML"
+          class="d-inline-flex gap-1 justify-content-end">
+        <input type="hidden" name="comments" value="Verified to match university syllabus criteria.">
+        <button type="submit" name="status" value="verified" class="btn btn-sm btn-outline-success" title="Approve & Mark Verified"><i class="fa-solid fa-check"></i></button>
+        <button type="submit" name="status" value="outdated" class="btn btn-sm btn-outline-warning" title="Mark Outdated"><i class="fa-solid fa-triangle-exclamation"></i></button>
+        <button type="submit" name="status" value="rejected" class="btn btn-sm btn-outline-danger" title="Reject Resource"><i class="fa-solid fa-xmark"></i></button>
+    </form>
+</td>

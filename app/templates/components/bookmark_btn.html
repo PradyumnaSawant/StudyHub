@@ -1,0 +1,7 @@
+<button class="btn btn-glass btn-sm {% if resource.is_bookmarked %}text-info{% else %}text-muted{% endif %}"
+        hx-post="/resources/{{ resource.id }}/bookmark"
+        hx-target="#bookmark-btn-{{ resource.id }}"
+        hx-swap="outerHTML"
+        title="Toggle Bookmark">
+    <i class="fa-{% if resource.is_bookmarked %}solid{% else %}regular{% endif %} fa-bookmark"></i>
+</button>

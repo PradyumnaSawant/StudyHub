@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ resource.title }} - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/resources" class="text-muted text-decoration-none">Resources</a></li>
+            <li class="breadcrumb-item text-muted">{{ resource.subject.department if resource.subject else 'General' }}</li>
+            <li class="breadcrumb-item active text-white" aria-current="page">{{ resource.title }}</li>
+        </ol>
+    </nav>
+
+    {% if request.query_params.get("reported") %}
+    <div class="alert alert-success border-0 bg-success bg-opacity-25 text-success py-2 px-3 rounded-3 mb-4">
+        <i class="fa-solid fa-check-circle me-2"></i> Resource flagged for moderator review. Thank you for maintaining content quality.
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Main Resource Details -->
+        <div class="col-lg-8">
+            <div class="glass-panel p-4 p-md-5 mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <span class="type-pill text-uppercase"><i class="fa-solid fa-file-pdf me-1"></i> {{ resource.type }}</span>
+                    <div>
+                        {% if resource.verification_status == 'verified' %}
+                        <span class="badge badge-verified"><i class="fa-solid fa-circle-check me-1"></i> Verified Material</span>
+                        {% elif resource.verification_status == 'pending' %}
+                        <span class="badge badge-pending"><i class="fa-solid fa-clock me-1"></i> Pending Moderator Verification</span>
+                        {% elif resource.verification_status == 'outdated' %}
+                        <span class="badge badge-outdated"><i class="fa-solid fa-triangle-exclamation me-1"></i> Marked Outdated</span>
+                        {% else %}
+                        <span class="badge badge-rejected"><i class="fa-solid fa-ban me-1"></i> Rejected</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h2 class="fw-bold text-white mb-3">{{ resource.title }}</h2>
+
+                <div class="d-flex flex-wrap gap-3 text-muted small mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <span><i class="fa-solid fa-book-bookmark text-info me-1"></i> <strong>Subject</strong>: {{ resource.subject.name }} ({{ resource.subject.code }})</span>
+                    <span><i class="fa-solid fa-tag text-warning me-1"></i> <strong>Syllabus Tag</strong>: {{ resource.syllabus_tag }}</span>
+                    <span><i class="fa-solid fa-file me-1"></i> <strong>Size</strong>: {{ resource.file_size or 'PDF Document' }}</span>
+                    <span><i class="fa-solid fa-calendar me-1"></i> <strong>Uploaded</strong>: {{ resource.upload_date.strftime('%b %d, %Y') }}</span>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-white mb-2">Description & Notes Overview</h5>
+                    <p class="text-muted leading-relaxed mb-0">
+                        {{ resource.description or 'No detailed description provided by the uploader. This resource is tagged under ' ~ resource.syllabus_tag ~ ' and formatted for engineering syllabus preparation.' }}
+                    </p>
+                </div>
+
+                <!-- Action Button Row -->
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="/resources/{{ resource.id }}/download" class="btn btn-primary-gradient btn-lg px-4" target="_blank">
+                        <i class="fa-solid fa-download me-2"></i> Download Document ({{ resource.download_count }})
+                    </a>
+
+                    <!-- AI Summary Button (Triggers HTMX Modal) -->
+                    <button class="btn btn-glass btn-lg px-4"
+                            hx-post="/resources/{{ resource.id }}/ai-summary"
+                            hx-target="#modal-container"
+                            hx-swap="innerHTML">
+                        <i class="fa-solid fa-wand-magic-sparkles text-warning me-2"></i> AI Fast-Track Summary
+                    </button>
+
+                    <!-- Bookmark Button -->
+                    {% if user %}
+                    <div id="bookmark-btn-{{ resource.id }}">
+                        {% include "components/bookmark_btn.html" %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Verification History / Moderator Comments -->
+            {% if resource.verifications %}
+            <div class="glass-panel p-4 mb-4">
+                <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-shield-check text-emerald me-2"></i> Verification Audit Log</h5>
+                {% for v in resource.verifications %}
+                <div class="p-3 bg-dark bg-opacity-50 rounded-3 mb-2 border border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold text-white"><i class="fa-solid fa-user-shield me-1 text-info"></i> {{ v.verifier.name }} ({{ v.verifier.role }})</span>
+                        <span class="text-muted small">{{ v.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <div class="small text-muted mb-0">Status: <strong class="text-capitalize text-white">{{ v.status }}</strong> — {{ v.comments or 'Verified to match university syllabus.' }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Meta & Report Card -->
+        <div class="col-lg-4">
+            <div class="glass-panel p-4 mb-4">
+                <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-user me-2 text-primary"></i> Uploader Profile</h5>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 48px; height: 48px;">
+                        {{ resource.uploader.name[0] if resource.uploader else 'U' }}
+                    </div>
+                    <div>
+                        <div class="fw-bold text-white mb-0">{{ resource.uploader.name if resource.uploader else 'Student Contributor' }}</div>
+                        <div class="text-muted small">{{ resource.uploader.role if resource.uploader else 'Student' }} • {{ resource.uploader.course or 'CSE' }}</div>
+                    </div>
+                </div>
+                <div class="text-muted small">
+                    <i class="fa-solid fa-building-columns me-1"></i> {{ resource.uploader.college if resource.uploader else 'Engineering Institute' }}
+                </div>
+            </div>
+
+            <!-- Report Resource Card -->
+            {% if user %}
+            <div class="glass-panel p-4">
+                <h5 class="fw-bold text-white mb-2"><i class="fa-solid fa-flag text-rose me-2"></i> Flag Outdated Content</h5>
+                <p class="text-muted small mb-3">Found incorrect answers, outdated syllabus, or copyright issue?</p>
+                
+                <form action="/resources/{{ resource.id }}/report" method="POST">
+                    <div class="mb-3">
+                        <select name="reason" class="form-select form-select-glass text-muted" required>
+                            <option value="" disabled selected>Select issue reason...</option>
+                            <option value="Outdated Syllabus Pattern">Outdated Syllabus Pattern</option>
+                            <option value="Incorrect / Duplicate Material">Incorrect / Duplicate Material</option>
+                            <option value="Poor File Quality / Unreadable">Poor File Quality / Unreadable</option>
+                            <option value="Inappropriate Content">Inappropriate Content</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-glass btn-sm w-100"><i class="fa-solid fa-paper-plane me-1"></i> Submit Report to Moderator</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

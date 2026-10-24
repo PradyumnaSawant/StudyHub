@@ -1,0 +1,32 @@
+# Environments and Secrets
+.env
+venv/
+.venv/
+env/
+ENV/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Database
+*.sqlite3
+*.db
+studyhub.db
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Static Uploads (keep directory structure with .gitkeep if needed)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

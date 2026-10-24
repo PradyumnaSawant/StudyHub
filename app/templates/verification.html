@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Verification Moderation Hub - StudyHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-shield-halved text-warning me-2"></i> Faculty Verification Hub</h3>
+            <p class="text-muted mb-0">Audit, approve, or mark uploaded study materials as outdated/rejected</p>
+        </div>
+        
+        <div class="btn-group glass-panel p-1">
+            <a href="/verification?status_filter=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-primary-gradient{% else %}btn-glass border-0{% endif %}">Pending</a>
+            <a href="/verification?status_filter=verified" class="btn btn-sm {% if status_filter == 'verified' %}btn-primary-gradient{% else %}btn-glass border-0{% endif %}">Verified</a>
+            <a href="/verification?status_filter=all" class="btn btn-sm {% if status_filter == 'all' %}btn-primary-gradient{% else %}btn-glass border-0{% endif %}">All Submissions</a>
+        </div>
+    </div>
+
+    <div class="glass-panel p-4">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 bg-transparent">
+                <thead>
+                    <tr class="text-muted small">
+                        <th>Resource Title</th>
+                        <th>Subject & Unit</th>
+                        <th>Uploader</th>
+                        <th>Status</th>
+                        <th class="text-end">Verification Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if resources %}
+                        {% for resource in resources %}
+                        <tr id="verification-row-{{ resource.id }}">
+                            {% include "components/verification_row.html" %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-circle-check fs-1 text-emerald mb-3"></i>
+                            <p class="mb-0">No resources matching status '<strong>{{ status_filter }}</strong>'. All caught up!</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
